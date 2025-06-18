@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Models
 {
@@ -17,14 +18,15 @@ namespace backend.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        public MediumType MediumType { get; set; } = MediumType.Cash;
+        public required MediumType MediumType { get; set; } = MediumType.Cash;
 
         // VALIDATE THIS IN FRONTEND
         // IF MEDIUM TYPE IS NOT CASH, PROVIDER NAME SHOULD BE REQUIRED
         public string ProviderName { get; set; } = string.Empty;
 
         [Required]
-        public float Amount { get; set; } = 0;
+        [Precision(18, 2)]
+        public required decimal Amount { get; set; }
 
         // VALIDATE THIS IN FRONTEND
         // Either Receipt or Transaction should be present, but both shouldn't be unavailable

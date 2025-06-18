@@ -11,18 +11,18 @@ namespace backend.Models
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
-        public DateTime StartTime { get; set; }
+        public required DateTime StartTime { get; set; }
         [Required]
-        public DateTime EndTime { get; set; }
+        public required DateTime EndTime { get; set; }
 
         [Required]
-        public string UserId { get; set; } = null!;
+        public required string UserId { get; set; } = null!;
 
         [Required]
-        public Guid PaymentId { get; set; }
+        public required Guid PaymentId { get; set; }
 
         [Required]
-        public int SubscriptionTierId { get; set; }
+        public required int SubscriptionTierId { get; set; }
 
 
         [ForeignKey(nameof(UserId))]

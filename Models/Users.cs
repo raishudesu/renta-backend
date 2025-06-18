@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
 
 namespace backend.Models
 {
     public class User : IdentityUser
     {
 
+
+        public string BusinessCoordinatesString { get; set; } = string.Empty;
 
         public virtual ICollection<Booking> UserBookings { get; set; } = new List<Booking>();
 

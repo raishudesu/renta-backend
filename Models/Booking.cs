@@ -15,14 +15,14 @@ namespace backend.Models
     public class Booking
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public required Guid Id { get; set; } = Guid.NewGuid();
         [Required]
-        public DateTime StartTime { get; set; }
+        public required DateTime StartTime { get; set; }
         [Required]
-        public DateTime EndTime { get; set; }
+        public required DateTime EndTime { get; set; }
 
         [Required]
-        public string BookerName { get; set; } = string.Empty;
+        public required string BookerName { get; set; } = string.Empty;
 
         // VALIDATE THIS IN FRONTEND
         // EITHER OF EMAIL OR PHONE SHOULD BE AVAILABLE, BOTH SHOULDN'T BE UNAVAILABLE
@@ -31,9 +31,9 @@ namespace backend.Models
         public string BookerPhone { get; set; } = string.Empty;
 
         [Required]
-        public string UserId { get; set; } = null!;
+        public required string UserId { get; set; } = null!;
         [Required]
-        public Guid VehicleId { get; set; }
+        public required Guid VehicleId { get; set; }
 
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
 

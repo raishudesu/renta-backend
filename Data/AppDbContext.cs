@@ -13,6 +13,17 @@ namespace backend.Data
         {
         }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // ✅ If you want, configure decimal precision here (optional but clear)
+            modelBuilder.Entity<SubscriptionTier>()
+                .Property(s => s.Price)
+                .HasPrecision(18, 2);
+
+        }
+
 
         // DbSet for UserTasks to represent the UserTask table in the database
         // public DbSet<UserTask> UserTasks { get; set; }
