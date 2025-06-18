@@ -6,11 +6,11 @@ namespace backend.Models
     public class User : IdentityUser
     {
 
-        // for one-to-one relation
-        // public virtual UserTask UserTask { get; set; } = null!;
 
-        // for one-to-many relation
-        // public virtual ICollection<UserTask> UserTasks { get; set; } = new List<UserTask>();
+        public virtual ICollection<Booking> UserBookings { get; set; } = new List<Booking>();
 
+        public virtual ICollection<Vehicle> UserVehicles { get; set; } = new List<Vehicle>();
+
+        public virtual ICollection<Subscription> UserSubscriptions { get; set; } = new List<Subscription>();
     }
 }
