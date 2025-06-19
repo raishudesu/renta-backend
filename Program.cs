@@ -93,7 +93,7 @@ builder.Services.AddAuthentication(options =>
 // builder.Services.AddScoped<UserTaskService>();
 builder.Services.AddScoped<UserService>();
 // builder.Services.AddScoped<IEmailSender<User>, EmailSender>();
-
+builder.Services.AddScoped<BookingService>();
 
 var app = builder.Build();
 

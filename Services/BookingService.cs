@@ -14,7 +14,7 @@ public class BookingService(AppDbContext context)
 
         ArgumentNullException.ThrowIfNull(booking);
 
-        db.Bookings.Add(booking);
+        db.Booking.Add(booking);
         await db.SaveChangesAsync();
 
         return booking;
@@ -25,7 +25,7 @@ public class BookingService(AppDbContext context)
     public async Task<List<Booking>> GetBookings()
     {
 
-        var bookings = await db.Bookings.ToListAsync();
+        var bookings = await db.Booking.ToListAsync();
 
         return bookings;
 
@@ -34,16 +34,17 @@ public class BookingService(AppDbContext context)
     public async Task<Booking?> GetBookingById(Guid id)
     {
 
-        var booking = await db.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == id);
+        var booking = await db.Booking.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == id);
 
         return booking;
 
     }
 
+    // PAGINATE
     public async Task<List<Booking>> GetBookingsByUserId(string id)
     {
 
-        var bookings = await db.Bookings.Where(b => b.UserId == id).ToListAsync();
+        var bookings = await db.Booking.Where(b => b.UserId == id).ToListAsync();
 
         return bookings;
 
@@ -55,7 +56,7 @@ public class BookingService(AppDbContext context)
     {
         ArgumentNullException.ThrowIfNull(booking);
 
-        db.Bookings.Update(booking);
+        db.Booking.Update(booking);
 
         await db.SaveChangesAsync();
 
@@ -64,7 +65,7 @@ public class BookingService(AppDbContext context)
     public async Task UpdateBookingStatusById(Guid id, BookingStatus newStatus)
     {
 
-        var booking = await db.Bookings.FindAsync(id)
+        var booking = await db.Booking.FindAsync(id)
             ?? throw new KeyNotFoundException($"Booking with ID: {id} not found");
 
         booking.Status = newStatus;
@@ -76,10 +77,10 @@ public class BookingService(AppDbContext context)
     public async Task DeleteBookingById(Guid id)
     {
 
-        var booking = await db.Bookings.FindAsync(id)
+        var booking = await db.Booking.FindAsync(id)
         ?? throw new KeyNotFoundException($"Booking with ID: {id} not found");
 
-        db.Bookings.Remove(booking);
+        db.Booking.Remove(booking);
 
         await db.SaveChangesAsync();
 
