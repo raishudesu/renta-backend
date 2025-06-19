@@ -4,56 +4,49 @@ using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
 
-public class BookingService
+public class BookingService(AppDbContext context)
 {
-    private readonly AppDbContext db;
+    private readonly AppDbContext db = context;
 
-    public BookingService(AppDbContext context)
+
+    public async Task<Booking> CreateBooking(Booking booking)
     {
-        db = context;
+
+        ArgumentNullException.ThrowIfNull(booking);
+
+        db.Bookings.Add(booking);
+        await db.SaveChangesAsync();
+
+        return booking;
+
     }
 
+    // PAGINATE
     public async Task<List<Booking>> GetBookings()
     {
-        try
-        {
-            var bookings = await db.Bookings.ToListAsync();
 
-            return bookings;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Error fetching bookings from database", ex);
-        }
+        var bookings = await db.Bookings.ToListAsync();
+
+        return bookings;
+
     }
 
     public async Task<Booking?> GetBookingById(Guid id)
     {
-        try
-        {
-            var booking = await db.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == id);
 
-            return booking;
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Error fetching booking from database", ex);
-        }
+        var booking = await db.Bookings.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == id);
+
+        return booking;
+
     }
 
     public async Task<List<Booking>> GetBookingsByUserId(string id)
     {
-        try
-        {
-            var bookings = await db.Bookings.Where(b => b.UserId == id).ToListAsync();
 
-            return bookings;
-        }
-        catch (Exception ex)
-        {
+        var bookings = await db.Bookings.Where(b => b.UserId == id).ToListAsync();
 
-            throw new Exception($"Error fetching bookings with ID {id}", ex);
-        }
+        return bookings;
+
     }
 
     // caution
@@ -62,58 +55,33 @@ public class BookingService
     {
         ArgumentNullException.ThrowIfNull(booking);
 
-        try
-        {
-            db.Bookings.Update(booking);
+        db.Bookings.Update(booking);
 
-            await db.SaveChangesAsync();
+        await db.SaveChangesAsync();
 
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Failed to update booking", ex);
-        }
     }
 
     public async Task UpdateBookingStatusById(Guid id, BookingStatus newStatus)
     {
 
-        try
-        {
-            var booking = await db.Bookings.FindAsync(id)
-                ?? throw new Exception($"Booking with ID: {id} not found");
+        var booking = await db.Bookings.FindAsync(id)
+            ?? throw new KeyNotFoundException($"Booking with ID: {id} not found");
 
-            booking.Status = newStatus;
+        booking.Status = newStatus;
 
-            await db.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-
-            throw new Exception("Failed to update booking status", ex);
-
-        }
+        await db.SaveChangesAsync();
 
     }
 
     public async Task DeleteBookingById(Guid id)
     {
 
-        try
-        {
-            var booking = await db.Bookings.FindAsync(id)
-            ?? throw new Exception($"Booking with ID: {id} not found");
+        var booking = await db.Bookings.FindAsync(id)
+        ?? throw new KeyNotFoundException($"Booking with ID: {id} not found");
 
-            db.Bookings.Remove(booking);
+        db.Bookings.Remove(booking);
 
-            await db.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-
-            throw new Exception("Failed to delete booking", ex);
-
-        }
+        await db.SaveChangesAsync();
 
     }
 }
