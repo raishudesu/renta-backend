@@ -13,6 +13,8 @@ namespace backend.Data
         {
         }
 
+        public DbSet<Booking> Bookings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
