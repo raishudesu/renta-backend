@@ -15,16 +15,16 @@ namespace backend.Models
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
-        public string ModelName { get; set; } = string.Empty;
+        public required string ModelName { get; set; } = string.Empty;
         [Required]
-        public VehicleType Type { get; set; } = VehicleType.Car;
+        public required VehicleType Type { get; set; } = VehicleType.Car;
         [Required]
-        public string Color { get; set; } = string.Empty;
+        public required string Color { get; set; } = string.Empty;
         [Required]
-        public string PlateNumber { get; set; } = string.Empty;
+        public required string PlateNumber { get; set; } = string.Empty;
 
         [Required]
-        public string OwnerId { get; set; } = null!;
+        public required string OwnerId { get; set; } = null!;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -36,5 +36,6 @@ namespace backend.Models
 
         public virtual ICollection<Booking> VehicleBookingRecords { get; set; } = new List<Booking>();
 
+        public virtual ICollection<VehicleImage> VehicleImages { get; set; } = new List<VehicleImage>();
     }
 }

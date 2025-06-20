@@ -15,6 +15,7 @@ namespace backend.Data
 
         public DbSet<Booking> Booking { get; set; }
 
+        public DbSet<Payment> Payment { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
