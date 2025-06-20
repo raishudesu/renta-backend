@@ -4,7 +4,7 @@ using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 
 
 

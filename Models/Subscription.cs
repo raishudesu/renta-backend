@@ -9,20 +9,26 @@ namespace backend.Models
     public class Subscription
     {
         [Key]
+        // [JsonIgnore]
         public Guid Id { get; set; } = Guid.NewGuid();
-        [Required]
-        public required DateTime StartTime { get; set; }
-        [Required]
-        public required DateTime EndTime { get; set; }
+        // [Required]
+        // DURATION WILL BE ASSIGNED/UPDATED ONCE THE SUBSCRIPTION IS VERIFIED
+        [JsonIgnore]
+        public DateTime? StartTime { get; set; }
+        // [Required]
+        [JsonIgnore]
+        public DateTime? EndTime { get; set; }
 
         [Required]
         public required string UserId { get; set; } = null!;
 
-        [Required]
-        public required Guid PaymentId { get; set; }
+        // [Required]
+        public Guid? PaymentId { get; set; }
 
         [Required]
         public required int SubscriptionTierId { get; set; }
+
+        public bool IsVerified { get; set; } = false;
 
 
         [ForeignKey(nameof(UserId))]
@@ -30,11 +36,11 @@ namespace backend.Models
         public User User { get; set; } = null!;
 
         [ForeignKey(nameof(PaymentId))]
-        [JsonIgnore]
-        public Payment PaymentDetails { get; set; } = null!;
+        // [JsonIgnore]
+        public Payment? PaymentDetails { get; set; }
 
         [ForeignKey(nameof(SubscriptionTierId))]
-        [JsonIgnore]
+        // [JsonIgnore]
         public SubscriptionTier SubscriptionTier { get; set; } = null!;
 
 

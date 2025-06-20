@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Models
@@ -15,6 +16,7 @@ namespace backend.Models
     public class Payment
     {
         [Key]
+        // [JsonIgnore]
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]

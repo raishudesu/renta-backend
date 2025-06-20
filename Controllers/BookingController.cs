@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class BookingController(BookingService bookingService) : ControllerBase
 {
     private readonly BookingService _bookingService = bookingService;

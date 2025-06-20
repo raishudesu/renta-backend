@@ -94,6 +94,9 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<UserService>();
 // builder.Services.AddScoped<IEmailSender<User>, EmailSender>();
 builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<SubscriptionService>();
+builder.Services.AddScoped<SubscriptionTierService>();
+builder.Services.AddScoped<PaymentService>();
 
 var app = builder.Build();
 
