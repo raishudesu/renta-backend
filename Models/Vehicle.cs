@@ -23,6 +23,8 @@ namespace backend.Models
         [Required]
         public required string PlateNumber { get; set; } = string.Empty;
 
+        public string Description { get; set; } = string.Empty;
+
         [Required]
         public required string OwnerId { get; set; } = null!;
 

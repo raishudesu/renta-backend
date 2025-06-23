@@ -21,6 +21,8 @@ namespace backend.Data
 
         public DbSet<SubscriptionTier> SubscriptionTier { get; set; }
 
+        public DbSet<Vehicle> Vehicle { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
