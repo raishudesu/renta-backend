@@ -1,17 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Models
 {
 
-    public enum MediumType
-    {
-        Ewallet,
-        Bank,
-
-        Cash
-    }
 
     public class Payment
     {
@@ -20,7 +14,7 @@ namespace backend.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        public required MediumType MediumType { get; set; } = MediumType.Cash;
+        public required int MediumTypeId { get; set; }
 
         // VALIDATE THIS IN FRONTEND
         // IF MEDIUM TYPE IS NOT CASH, PROVIDER NAME SHOULD BE REQUIRED
@@ -35,5 +29,9 @@ namespace backend.Models
         public string ReceiptImageLink { get; set; } = string.Empty;
 
         public string TransactionId { get; set; } = string.Empty;
+
+        [ForeignKey(nameof(MediumTypeId))]
+        [JsonIgnore]
+        public MediumType MediumType { get; set; } = null!;
     }
 }

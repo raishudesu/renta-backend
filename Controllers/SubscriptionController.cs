@@ -49,7 +49,7 @@ public class SubscriptionController(SubscriptionService subscriptionService, Pay
         var payment = new Payment
         {
             // Id = Guid.NewGuid(),
-            MediumType = dto.Payment.MediumType,
+            MediumTypeId = dto.Payment.MediumTypeId,
             ProviderName = dto.Payment.ProviderName,
             Amount = tier.Price,
             ReceiptImageLink = dto.Payment.ReceiptImageLink,
