@@ -16,6 +16,13 @@ namespace backend.Services
             return subTier;
         }
 
+        public async Task<SubscriptionTier?> GetByIdAsync(int id)
+        {
+            var subTier = await db.SubscriptionTier.FindAsync(id);
+
+            return subTier;
+        }
+
         public async Task<SubscriptionTier?> GetSubscriptionTierById(int id)
         {
             var subTier = await db.SubscriptionTier.FindAsync(id);

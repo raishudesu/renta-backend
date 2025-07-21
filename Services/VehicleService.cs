@@ -18,6 +18,12 @@ public class VehicleService(AppDbContext context)
         return vehicle;
     }
 
+    public async Task<List<Vehicle>> GetVehicles()
+    {
+        var vehicles = await db.Vehicle.ToListAsync();
+
+        return vehicles;
+    }
 
     // PAGINATE
     public async Task<List<Vehicle>> GetVehiclesByUserId(string userId)
