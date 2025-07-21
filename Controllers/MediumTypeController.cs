@@ -1,5 +1,6 @@
 
 
+using backend.DTOs.MediumType;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -36,11 +37,24 @@ public class MediumTypeController(MediumTypeService mediumTypeService) : Control
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, MediumType mediumType)
+    public async Task<IActionResult> Update(int id, [FromBody] MediumTypeDto mediumType)
     {
-        if (id != mediumType.Id) return BadRequest();
+        try
+        {
+            var existingMediumType = await _mediumTypeService.GetMediumTypeById(id);
+            if (existingMediumType == null)
+            {
+                return NotFound();
+            }
 
-        await _mediumTypeService.UpdateMediumType(id, mediumType);
+            existingMediumType.Name = mediumType.Name;
+
+            await _mediumTypeService.UpdateMediumType(id, existingMediumType);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(ex.Message);
+        }
 
         return NoContent();
     }

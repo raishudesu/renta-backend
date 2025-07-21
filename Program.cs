@@ -97,6 +97,10 @@ builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<SubscriptionService>();
 builder.Services.AddScoped<SubscriptionTierService>();
 builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<SubscriptionTierService>();
+builder.Services.AddScoped<VehicleService>();
+builder.Services.AddScoped<MediumTypeService>();
+
 
 var app = builder.Build();
 

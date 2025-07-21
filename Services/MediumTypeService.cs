@@ -1,5 +1,7 @@
 using backend.Data;
+using backend.DTOs.MediumType;
 using backend.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services;
@@ -36,6 +38,11 @@ public class MediumTypeService(AppDbContext context)
     public async Task UpdateMediumType(int id, MediumType newMediumType)
     {
         var oldMediumType = await db.MediumType.FindAsync(id) ?? throw new KeyNotFoundException($"Medium Type with ID: {id} not found");
+
+        if (oldMediumType.Id != id)
+        {
+            throw new ArgumentException("ID mismatch between ID parameter and MediumType ID");
+        }
 
         ArgumentNullException.ThrowIfNull(newMediumType);
 
