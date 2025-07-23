@@ -11,6 +11,7 @@ using System.Security.Claims;
 using System.Text;
 using backend.Models;
 using Microsoft.AspNetCore.Identity.Data;
+using backend.DTOs.User;
 
 
 public class JwtSettings
@@ -45,9 +46,9 @@ namespace dotnet_authentication.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterRequest request)
+        public async Task<IActionResult> Register(UserRegistrationDto request)
         {
-            var user = new User { UserName = request.Email, Email = request.Email };
+            var user = new User { FirstName = request.FirstName, LastName = request.LastName, Email = request.Email };
             var result = await _userManager.CreateAsync(user, request.Password);
 
             if (result.Succeeded)

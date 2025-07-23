@@ -12,6 +12,8 @@ public class VehicleService(AppDbContext context)
     {
         ArgumentNullException.ThrowIfNull(vehicle);
 
+        vehicle.Owner = await db.Users.FindAsync(vehicle.OwnerId) ?? throw new ArgumentException("Invalid OwnerId.", nameof(vehicle.OwnerId));
+
         db.Vehicle.Add(vehicle);
         await db.SaveChangesAsync();
 

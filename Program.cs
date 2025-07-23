@@ -101,6 +101,16 @@ builder.Services.AddScoped<SubscriptionTierService>();
 builder.Services.AddScoped<VehicleService>();
 builder.Services.AddScoped<MediumTypeService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowRentaWebFrontend", builder =>
+    {
+        builder.WithOrigins("http://localhost:3000")
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
 
 var app = builder.Build();
 
@@ -118,5 +128,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors("AllowRentaWebFrontend");
+
 
 app.Run();

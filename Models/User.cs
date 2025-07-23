@@ -7,6 +7,10 @@ namespace backend.Models
 
         public string BusinessCoordinatesString { get; set; } = string.Empty;
 
+        public string FirstName { get; set; } = string.Empty;
+
+        public string LastName { get; set; } = string.Empty;
+
         public virtual ICollection<Booking> UserBookings { get; set; } = new List<Booking>();
 
         public virtual ICollection<Vehicle> UserVehicles { get; set; } = new List<Vehicle>();

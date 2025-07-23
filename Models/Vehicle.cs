@@ -13,6 +13,7 @@ namespace backend.Models
     public class Vehicle
     {
         [Key]
+        [JsonIgnore]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public required string ModelName { get; set; } = string.Empty;
@@ -28,16 +29,18 @@ namespace backend.Models
         [Required]
         public required string OwnerId { get; set; } = null!;
 
+        [JsonIgnore]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Navigation property for the owner
         [ForeignKey(nameof(OwnerId))]
         [JsonIgnore]
-        // Navigation property for the owner
         public User Owner { get; set; } = null!;
 
-
+        [JsonIgnore]
         public virtual ICollection<Booking> VehicleBookingRecords { get; set; } = new List<Booking>();
 
+        [JsonIgnore]
         public virtual ICollection<VehicleImage> VehicleImages { get; set; } = new List<VehicleImage>();
     }
 }

@@ -1,4 +1,5 @@
 
+using backend.DTOs.Vehicle;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -35,11 +36,21 @@ public class VehicleController(VehicleService vehicleService) : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Vehicle>> Create(Vehicle vehicle)
+    public async Task<ActionResult<Vehicle>> Create([FromBody] VehicleDto vehicle)
     {
-        var createdVehicle = await _vehicleService.CreateVehicle(vehicle);
+        var vehicleToCreate = new Vehicle
+        {
+            Color = vehicle.Color,
+            ModelName = vehicle.ModelName,
+            Type = vehicle.Type,
+            Description = vehicle.Description,
+            PlateNumber = vehicle.PlateNumber,
+            OwnerId = vehicle.OwnerId
+        };
 
-        return CreatedAtAction(nameof(GetById), new { id = vehicle.Id }, vehicle);
+        var createdVehicle = await _vehicleService.CreateVehicle(vehicleToCreate);
+
+        return CreatedAtAction(nameof(GetById), new { id = createdVehicle.Id }, vehicleToCreate);
     }
 
     [HttpPut("{id}")]

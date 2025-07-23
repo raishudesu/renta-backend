@@ -30,6 +30,8 @@ namespace backend.Models
 
         public string BookerPhone { get; set; } = string.Empty;
 
+        public string BookerPhoneCountry { get; set; } = string.Empty;
+
         [Required]
         public required string UserId { get; set; } = null!;
         [Required]
