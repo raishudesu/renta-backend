@@ -80,7 +80,9 @@ namespace dotnet_authentication.Controllers
                 {
                     message = "Login successful",
                     token = token,
-                    email = user!.Email
+                    email = user!.Email,
+                    id = user!.Id,
+                    roles
                 });
             }
 
