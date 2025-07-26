@@ -1,7 +1,7 @@
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-
 
 [ApiController]
 [Route("api/[controller]/roles")]
@@ -21,6 +21,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("add")]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
     public async Task<IActionResult> AddRole([FromBody] string role)
     {
 
@@ -38,6 +39,8 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("add-to-user")]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
+
     public async Task<IActionResult> AddToUser([FromBody] string role, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);

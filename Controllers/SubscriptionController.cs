@@ -4,6 +4,7 @@ using backend.DTOs.Subscription;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -17,6 +18,8 @@ public class SubscriptionController(SubscriptionService subscriptionService, Pay
     private readonly PaymentService _paymentService = paymentService;
 
     [HttpGet]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
+
     public async Task<ActionResult<List<Subscription>>> GetAll()
     {
         var subs = await _subscriptionService.GetSubscriptions();
@@ -25,6 +28,7 @@ public class SubscriptionController(SubscriptionService subscriptionService, Pay
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<Subscription>> GetById(Guid id)
     {
         var sub = await _subscriptionService.GetSubscriptionById(id);
@@ -33,6 +37,7 @@ public class SubscriptionController(SubscriptionService subscriptionService, Pay
     }
 
     [HttpGet("user/{userId}")]
+    [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<List<Subscription>>> GetByUserId(string userId)
     {
         var userSubs = await _subscriptionService.GetSubscriptionsByUserId(userId);
@@ -41,6 +46,7 @@ public class SubscriptionController(SubscriptionService subscriptionService, Pay
     }
 
     [HttpPost]
+    [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<Subscription>> Create([FromBody] CreateSubscriptionWithPaymentDto dto)
     {
         var tier = await _subscriptionTierService.GetSubscriptionTierById(dto.SubscriptionTierId)
@@ -74,6 +80,7 @@ public class SubscriptionController(SubscriptionService subscriptionService, Pay
     }
 
     [HttpGet("user/{userId}/latest")]
+    [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<Subscription>> GetLatestSubscriptionOfUser(string userId)
     {
         var latest = await _subscriptionService.GetLatestSubscriptionOfUser(userId);

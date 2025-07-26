@@ -2,6 +2,13 @@ using Microsoft.AspNetCore.Identity;
 
 namespace backend.Models
 {
+
+    public enum RoleTypes
+    {
+        User,
+        Admin
+    }
+
     public class User : IdentityUser
     {
 

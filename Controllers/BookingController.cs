@@ -30,6 +30,7 @@ public class BookingController(BookingService bookingService) : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<Booking>> Create(Booking booking)
     {
         var createdBooking = await _bookingService.CreateBooking(booking);
@@ -38,6 +39,8 @@ public class BookingController(BookingService bookingService) : ControllerBase
     }
 
     [HttpPut("{id}")]
+    // [Authorize(Roles = nameof(RoleTypes.User))]
+
     public async Task<IActionResult> Update(Guid id, Booking booking)
     {
         if (id != booking.Id) return BadRequest();
@@ -48,6 +51,7 @@ public class BookingController(BookingService bookingService) : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    // [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> Delete(Guid id)
     {
         await _bookingService.DeleteBookingById(id);

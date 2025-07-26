@@ -4,6 +4,7 @@ using backend.DTOs.MediumType;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,6 +14,8 @@ public class MediumTypeController(MediumTypeService mediumTypeService) : Control
     private readonly MediumTypeService _mediumTypeService = mediumTypeService;
 
     [HttpGet]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
+
     public async Task<ActionResult<List<MediumType>>> GetAll()
     {
         var mediumTypes = await _mediumTypeService.GetMediumTypes();
@@ -21,6 +24,8 @@ public class MediumTypeController(MediumTypeService mediumTypeService) : Control
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
+
     public async Task<ActionResult<MediumType>> GetById(int id)
     {
         var mediumType = await _mediumTypeService.GetMediumTypeById(id);
@@ -29,6 +34,8 @@ public class MediumTypeController(MediumTypeService mediumTypeService) : Control
     }
 
     [HttpPost]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
+
     public async Task<ActionResult<MediumType>> Create(MediumType mediumType)
     {
         var createdType = await _mediumTypeService.CreateMediumType(mediumType);
@@ -37,6 +44,8 @@ public class MediumTypeController(MediumTypeService mediumTypeService) : Control
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
+
     public async Task<IActionResult> Update(int id, [FromBody] MediumTypeDto mediumType)
     {
         try
@@ -60,6 +69,8 @@ public class MediumTypeController(MediumTypeService mediumTypeService) : Control
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
+
     public async Task<IActionResult> Delete(int id)
     {
         await _mediumTypeService.DeleteMediumTypeById(id);

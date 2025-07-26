@@ -1,5 +1,6 @@
 using backend.Data;
 using backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace backend.Services
 {
@@ -16,11 +17,11 @@ namespace backend.Services
             return subTier;
         }
 
-        public async Task<SubscriptionTier?> GetByIdAsync(int id)
+        public async Task<List<SubscriptionTier>> GetSubscriptionTiers()
         {
-            var subTier = await db.SubscriptionTier.FindAsync(id);
+            var subTiers = await db.SubscriptionTier.ToListAsync();
 
-            return subTier;
+            return subTiers;
         }
 
         public async Task<SubscriptionTier?> GetSubscriptionTierById(int id)

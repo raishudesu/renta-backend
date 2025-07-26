@@ -10,11 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 
 public class UserController : ControllerBase
 {
-    public enum RoleTypes
-    {
-        User,
-        Admin
-    }
 
     private readonly UserService _userService;
 
@@ -33,6 +28,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<User>> GetById(string id)
     {
         var user = await _userService.GetUserById(id);
