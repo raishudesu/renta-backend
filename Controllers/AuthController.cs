@@ -48,13 +48,18 @@ namespace dotnet_authentication.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserRegistrationDto request)
         {
-            var user = new User { FirstName = request.FirstName, LastName = request.LastName, Email = request.Email };
+            var user = new User { UserName = request.Email, FirstName = request.FirstName, LastName = request.LastName, Email = request.Email };
             var result = await _userManager.CreateAsync(user, request.Password);
+
 
             if (result.Succeeded)
             {
-                return Ok(new { message = "User created successfully" });
+                // Assign default role to the user
+                await _userManager.AddToRoleAsync(user, RoleTypes.User.ToString());
+
+                return Ok(new { message = "User registered successfully" });
             }
+
 
             return BadRequest(result.Errors);
         }
