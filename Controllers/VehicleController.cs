@@ -8,9 +8,10 @@ using Microsoft.AspNetCore.Authorization;
 [ApiController]
 [Route("api/[controller]")]
 
-public class VehicleController(VehicleService vehicleService) : ControllerBase
+public class VehicleController(VehicleService vehicleService, VehicleImageService vehicleImageService) : ControllerBase
 {
     private readonly VehicleService _vehicleService = vehicleService;
+    private readonly VehicleImageService _vehicleImageService = vehicleImageService;
 
     [HttpGet]
     [Authorize(Roles = nameof(RoleTypes.Admin))]
@@ -53,8 +54,23 @@ public class VehicleController(VehicleService vehicleService) : ControllerBase
 
         var createdVehicle = await _vehicleService.CreateVehicle(vehicleToCreate);
 
+        // Handle image associations if provided
+        if (vehicle.ImageLinks != null && vehicle.ImageLinks.Count > 0)
+        {
+            foreach (var imageLink in vehicle.ImageLinks)
+            {
+                var vehicleImage = new VehicleImage
+                {
+                    VehicleId = createdVehicle.Id,
+                    ImageLink = imageLink
+                };
+                await _vehicleImageService.CreateVehicleImage(vehicleImage);
+            }
+        }
+
         return CreatedAtAction(nameof(GetById), new { id = createdVehicle.Id }, vehicleToCreate);
     }
+
     [HttpPut("{id}")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> Update(Guid id, Vehicle vehicle)

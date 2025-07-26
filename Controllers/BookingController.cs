@@ -13,7 +13,7 @@ public class BookingController(BookingService bookingService) : ControllerBase
     private readonly BookingService _bookingService = bookingService;
 
     [HttpGet]
-    // [Authorize]
+    [Authorize(Roles = nameof(RoleTypes.Admin))]
     public async Task<ActionResult<List<Booking>>> GetAll()
     {
         var bookings = await _bookingService.GetBookings();
@@ -27,6 +27,15 @@ public class BookingController(BookingService bookingService) : ControllerBase
         var booking = await _bookingService.GetBookingById(id);
 
         return booking != null ? Ok(booking) : NotFound();
+    }
+
+    [HttpGet("user/{userId}")]
+    [Authorize(Roles = nameof(RoleTypes.User))]
+    public async Task<ActionResult<List<Booking>>> GetByUserId(string userId)
+    {
+        var bookings = await _bookingService.GetBookingsByUserId(userId);
+
+        return Ok(bookings);
     }
 
     [HttpPost]

@@ -24,6 +24,7 @@ namespace backend.Data
         public DbSet<MediumType> MediumType { get; set; }
 
         public DbSet<Vehicle> Vehicle { get; set; }
+        public DbSet<VehicleImage> VehicleImage { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

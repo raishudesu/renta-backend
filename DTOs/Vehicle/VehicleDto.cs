@@ -12,5 +12,7 @@ namespace backend.DTOs.Vehicle
         public required string PlateNumber { get; init; }
         public string Description { get; init; } = string.Empty;
         public required string OwnerId { get; init; }
+
+        public required List<string> ImageLinks { get; init; } = new();
     }
 }
