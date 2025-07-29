@@ -67,31 +67,32 @@ namespace dotnet_authentication.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
-            var result = await _signInManager.PasswordSignInAsync(request.Email,
-                request.Password, isPersistent: false, lockoutOnFailure: false);
+            var user = await _userManager.FindByEmailAsync(request.Email);
 
-            if (result.Succeeded)
+            if (user == null)
             {
-
-                var user = await _userManager.FindByEmailAsync(request.Email);
-
-                var roles = await _userManager.GetRolesAsync(user!);
-
-
-
-                var token = GenerateJwtToken(user!, roles);
-
-                return Ok(new
-                {
-                    message = "Login successful",
-                    token = token,
-                    email = user!.Email,
-                    id = user!.Id,
-                    roles
-                });
+                return BadRequest("User does not exist.");
             }
 
-            return BadRequest("Invalid login attempt");
+            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: false);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest("Incorrect password.");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            var token = GenerateJwtToken(user, roles);
+
+            return Ok(new
+            {
+                message = "Login successful",
+                token = token,
+                email = user.Email,
+                id = user.Id,
+                roles
+            });
         }
 
         private string GenerateJwtToken(User user, IList<string> roles)
