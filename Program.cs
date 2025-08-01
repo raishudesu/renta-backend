@@ -112,6 +112,7 @@ builder.Services.AddScoped<SubscriptionTierService>();
 builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<SubscriptionTierService>();
 builder.Services.AddScoped<VehicleService>();
+builder.Services.AddScoped<VehicleImageService>();
 builder.Services.AddScoped<MediumTypeService>();
 
 builder.Services.AddCors(options =>

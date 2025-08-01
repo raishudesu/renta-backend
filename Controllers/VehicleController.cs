@@ -126,8 +126,10 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
 
     [HttpPost]
     [Authorize(Roles = nameof(RoleTypes.User))]
-    public async Task<ActionResult<Vehicle>> Create([FromBody] VehicleDto vehicle)
+    public async Task<ActionResult<Vehicle>> Create([FromForm] VehicleDto vehicle)
     {
+
+
         var vehicleToCreate = new Vehicle
         {
             Color = vehicle.Color,
