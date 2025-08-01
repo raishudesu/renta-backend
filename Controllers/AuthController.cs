@@ -91,6 +91,9 @@ namespace dotnet_authentication.Controllers
                 token = token,
                 email = user.Email,
                 id = user.Id,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                businessName = user.BusinessName,
                 roles
             });
         }

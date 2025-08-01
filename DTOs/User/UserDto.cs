@@ -9,4 +9,10 @@ namespace backend.DTOs.User
         // public required string PhoneNumber { get; init; }
         public required string Password { get; init; }
     }
+
+    public class UserStatsDto
+    {
+        public int TotalVehicles { get; set; }
+        public int TotalBookings { get; set; }
+    }
 }

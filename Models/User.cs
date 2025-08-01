@@ -18,6 +18,8 @@ namespace backend.Models
 
         public string LastName { get; set; } = string.Empty;
 
+        public string BusinessName { get; set; } = string.Empty;
+
         public virtual ICollection<Booking> UserBookings { get; set; } = new List<Booking>();
 
         public virtual ICollection<Vehicle> UserVehicles { get; set; } = new List<Vehicle>();

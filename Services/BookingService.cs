@@ -85,4 +85,9 @@ public class BookingService(AppDbContext context)
         await db.SaveChangesAsync();
 
     }
+
+    public async Task<int> GetTotalBookingsByUserId(string userId)
+    {
+        return await db.Booking.CountAsync(b => b.UserId == userId);
+    }
 }

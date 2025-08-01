@@ -63,4 +63,9 @@ public class VehicleService(AppDbContext context)
 
 
     }
+
+    public async Task<int> GetTotalVehiclesByUserId(string userId)
+    {
+        return await db.Vehicle.CountAsync(v => v.OwnerId == userId);
+    }
 }
