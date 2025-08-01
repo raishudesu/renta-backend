@@ -10,7 +10,10 @@ namespace backend.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        public required string ImageLink { get; set; } = string.Empty;
+        public required string S3BucketName { get; set; } = string.Empty;
+
+        [Required]
+        public required string S3ObjectKey { get; set; } = string.Empty;
 
         [Required]
         public required Guid VehicleId { get; set; }

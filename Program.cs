@@ -6,9 +6,14 @@ using backend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Amazon.S3;
 
 DotNetEnv.Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
+var s3AccessKey = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+var s3SecretKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -30,6 +35,11 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddControllers();
+
+var s3Client = new AmazonS3Client(new Amazon.Runtime.BasicAWSCredentials(s3AccessKey, s3SecretKey), Amazon.RegionEndpoint.APSoutheast1);
+
+builder.Services.AddSingleton<IAmazonS3>(s3Client);
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
