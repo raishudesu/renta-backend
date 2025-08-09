@@ -81,7 +81,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
             PlateNumber = vehicle.PlateNumber,
             Description = vehicle.Description,
             OwnerId = vehicle.OwnerId,
-            ImagePreSignedUrl = preSignedUrl
+            ImagePreSignedUrl = preSignedUrl ?? null
         };
 
         return Ok(vehicleWithImage);
@@ -117,7 +117,8 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
                 PlateNumber = vehicle.PlateNumber,
                 Description = vehicle.Description,
                 OwnerId = vehicle.OwnerId,
-                ImagePreSignedUrl = imageUrls[0] // temporarily using the first image URL, can be modified to support multiple images
+                ImagePreSignedUrl = imageUrls.Count > 0 ? imageUrls[0] : null // safely get the first image URL or null if none exist
+
             });
         }
 
