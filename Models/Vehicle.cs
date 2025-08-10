@@ -13,7 +13,6 @@ namespace backend.Models
     public class Vehicle
     {
         [Key]
-        [JsonIgnore]
         public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public required string ModelName { get; set; } = string.Empty;

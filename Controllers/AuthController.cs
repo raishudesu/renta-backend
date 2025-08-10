@@ -114,7 +114,7 @@ namespace dotnet_authentication.Controllers
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var expires = DateTime.Now.AddMinutes(_jwtSettings.ExpirationInMinutes);
+            var expires = DateTime.Now.AddDays(7);
 
             var token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,

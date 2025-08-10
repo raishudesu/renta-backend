@@ -5,16 +5,19 @@ using backend.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Amazon.S3;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
 
-public class VehicleController(VehicleService vehicleService, VehicleImageService vehicleImageService, IAmazonS3 s3Client) : ControllerBase
+public class VehicleController(VehicleService vehicleService, VehicleImageService vehicleImageService, IAmazonS3 s3Client, ILogger<VehicleController> logger) : ControllerBase
 {
     private readonly VehicleService _vehicleService = vehicleService;
     private readonly VehicleImageService _vehicleImageService = vehicleImageService;
 
     private readonly IAmazonS3 _s3Client = s3Client;
+
+    private readonly ILogger _logger = logger;
 
     [HttpGet]
     [Authorize(Roles = nameof(RoleTypes.Admin))]
@@ -88,7 +91,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
     }
 
     [HttpGet("user/{userId}")]
-    public async Task<ActionResult<List<Vehicle>>> GetByUserId(string userId)
+    public async Task<ActionResult<List<VehicleWithImageUrlDto>>> GetByUserId(string userId)
     {
         var vehicles = await _vehicleService.GetVehiclesByUserId(userId);
 
@@ -193,6 +196,56 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
         return NoContent();
     }
 
+    // [HttpDelete("{id}")]
+    // [Authorize(Roles = nameof(RoleTypes.User))]
+    // public async Task<IActionResult> Delete(Guid id)
+    // {
+    //     var vehicle = await _vehicleService.GetVehicleById(id);
+    //     if (vehicle == null) return NotFound();
+
+    //     // Get the current user's id from the claims
+    //     var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+    //     // Ensure the user is the owner of the vehicle
+
+    //     if (userId == null || userId != vehicle.OwnerId)
+    //     {
+    //         return Forbid();
+    //     }
+
+    //     await _vehicleService.DeleteVehicleById(id);
+
+    //     // Delete associated vehicle images from S3
+
+    //     var vehicleImages = await _vehicleImageService.GetVehicleImagesByVehicleId(id);
+
+    //     foreach (var image in vehicleImages)
+    //     {
+    //         try
+    //         {
+    //             _logger.LogInformation($"Deleting S3 object: Bucket={image.S3BucketName}, Key={image.S3ObjectKey}");
+
+    //             await _s3Client.DeleteObjectAsync(new Amazon.S3.Model.DeleteObjectRequest
+    //             {
+    //                 BucketName = image.S3BucketName,
+    //                 Key = image.S3ObjectKey
+    //             });
+
+    //             await _vehicleImageService.DeleteVehicleImageById(image.Id);
+    //             _logger.LogInformation($"Successfully deleted image {image.Id}");
+
+    //         }
+    //         catch (Exception ex)
+    //         {
+    //             _logger.LogError(ex, $"Failed to delete image {image.Id}");
+    //             // return StatusCode(500, $"Failed to delete image: {ex.Message}");
+    //         }
+
+    //         // await _vehicleImageService.DeleteVehicleImageById(image.Id);
+    //     }
+
+    //     return NoContent();
+    // }
     [HttpDelete("{id}")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> Delete(Guid id)
@@ -200,15 +253,61 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
         var vehicle = await _vehicleService.GetVehicleById(id);
         if (vehicle == null) return NotFound();
 
-        // Get the current user's id from the claims
-        var userId = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "id")?.Value;
+        var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
         if (userId == null || userId != vehicle.OwnerId)
         {
             return Forbid();
         }
 
+        var vehicleImages = await _vehicleImageService.GetVehicleImagesByVehicleId(id);
+
+        var s3Results = new List<object>();
+
+        foreach (var image in vehicleImages)
+        {
+            try
+            {
+                var deleteRequest = new Amazon.S3.Model.DeleteObjectRequest
+                {
+                    BucketName = image.S3BucketName,
+                    Key = image.S3ObjectKey
+                };
+
+                var response = await _s3Client.DeleteObjectAsync(deleteRequest);
+
+                s3Results.Add(new
+                {
+                    ImageId = image.Id,
+                    Bucket = image.S3BucketName,
+                    Key = image.S3ObjectKey,
+                    Success = true,
+                    HttpStatusCode = response.HttpStatusCode,
+                    ResponseMessage = "S3 deletion successful"
+                });
+            }
+            catch (Exception ex)
+            {
+                s3Results.Add(new
+                {
+                    ImageId = image.Id,
+                    Bucket = image.S3BucketName,
+                    Key = image.S3ObjectKey,
+                    Success = false,
+                    Error = ex.Message,
+                    ExceptionType = ex.GetType().Name,
+                    InnerException = ex.InnerException?.Message
+                });
+            }
+
+            await _vehicleImageService.DeleteVehicleImageById(image.Id);
+        }
+
         await _vehicleService.DeleteVehicleById(id);
 
-        return NoContent();
+        return Ok(new
+        {
+            Message = "Vehicle deleted",
+            S3Results = s3Results
+        });
     }
 }

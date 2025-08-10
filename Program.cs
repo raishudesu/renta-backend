@@ -35,6 +35,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 builder.Services.AddControllers();
+builder.Services.AddLogging();
 
 var s3Client = new AmazonS3Client(new Amazon.Runtime.BasicAWSCredentials(s3AccessKey, s3SecretKey), Amazon.RegionEndpoint.APSoutheast1);
 
