@@ -7,7 +7,7 @@ namespace backend.DTOs.VehicleDto
     {
         public required string ModelName { get; init; }
 
-        public required VehicleType Type { get; init; } = VehicleType.Car;
+        public required VehicleType? Type { get; init; }
 
         public IFormFile? VehicleImageFile { get; init; }
 

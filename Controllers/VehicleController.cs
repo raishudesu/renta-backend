@@ -138,7 +138,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
         {
             Color = vehicle.Color,
             ModelName = vehicle.ModelName,
-            Type = vehicle.Type,
+            Type = vehicle.Type ?? VehicleType.Car, // Default to Car if Type is null
             Description = vehicle.Description,
             PlateNumber = vehicle.PlateNumber,
             OwnerId = vehicle.OwnerId
@@ -178,74 +178,88 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
         return CreatedAtAction(nameof(GetById), new { id = createdVehicle.Id }, vehicleToCreate);
     }
 
-    [HttpPut("{id}")]
+    [HttpPatch("{id}")]
     [Authorize(Roles = nameof(RoleTypes.User))]
-    public async Task<IActionResult> Update(Guid id, Vehicle vehicle)
+    public async Task<IActionResult> Update(Guid id, [FromForm] VehicleDto vehicle)
     {
-        if (id != vehicle.Id) return BadRequest();
+        var existingVehicle = await _vehicleService.GetVehicleById(id);
+        if (existingVehicle == null) return NotFound();
+
 
         // Get the current user's id from the claims
-        var userId = User.Claims.FirstOrDefault(c => c.Type == "sub" || c.Type == "id")?.Value;
+        var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
         if (userId == null || userId != vehicle.OwnerId)
         {
             return Forbid();
         }
 
-        await _vehicleService.UpdateVehicle(vehicle);
+        var vehicleImages = await _vehicleImageService.GetVehicleImagesByVehicleId(id);
 
-        return NoContent();
+        if (vehicle.VehicleImageFile != null)
+        {
+            // Delete existing images from S3
+            // there could be a better way such as check first if the current image is the same as the new one
+            // and only delete if they are different
+            foreach (var image in vehicleImages)
+            {
+                var deleteRequest = new Amazon.S3.Model.DeleteObjectRequest
+                {
+                    BucketName = image.S3BucketName,
+                    Key = image.S3ObjectKey
+                };
+                var response = await _s3Client.DeleteObjectAsync(deleteRequest);
+
+                await _vehicleImageService.DeleteVehicleImageById(image.Id);
+            }
+
+            using (var memoryStream = new MemoryStream())
+            {
+                await vehicle.VehicleImageFile.CopyToAsync(memoryStream);
+                var uploadRequest = new Amazon.S3.Model.PutObjectRequest
+                {
+                    BucketName = "renta-s3", // Replace with your S3 bucket name
+                    Key = $"vehicle-images/{id}/{vehicle.VehicleImageFile.FileName}",
+                    InputStream = memoryStream,
+                    ContentType = vehicle.VehicleImageFile.ContentType
+                };
+
+                await _s3Client.PutObjectAsync(uploadRequest);
+            }
+
+            var vehicleImage = new VehicleImage
+            {
+                VehicleId = id,
+                S3BucketName = "renta-s3",
+                S3ObjectKey = $"vehicle-images/{id}/{vehicle.VehicleImageFile.FileName}"
+            };
+
+            // Save the vehicle image details to the database
+            await _vehicleImageService.CreateVehicleImage(vehicleImage);
+        }
+
+        // var updatedVehicle = new Vehicle
+        // {
+        //     Id = id,
+        //     ModelName = vehicle.ModelName ?? existingVehicle.ModelName,
+        //     Type = vehicle.Type ?? existingVehicle.Type,
+        //     Color = vehicle.Color ?? existingVehicle.Color,
+        //     PlateNumber = vehicle.PlateNumber ?? existingVehicle.PlateNumber,
+        //     Description = vehicle.Description ?? existingVehicle.Description,
+        //     OwnerId = existingVehicle.OwnerId
+        // };
+        // Update the existing tracked entity instead of creating a new one
+        existingVehicle.ModelName = vehicle.ModelName ?? existingVehicle.ModelName;
+        existingVehicle.Type = vehicle.Type ?? existingVehicle.Type;
+        existingVehicle.Color = vehicle.Color ?? existingVehicle.Color;
+        existingVehicle.PlateNumber = vehicle.PlateNumber ?? existingVehicle.PlateNumber;
+        existingVehicle.Description = vehicle.Description ?? existingVehicle.Description;
+        // Don't update OwnerId as it should remain the same
+
+        await _vehicleService.UpdateVehicle(existingVehicle);
+
+        return Ok(existingVehicle);
     }
 
-    // [HttpDelete("{id}")]
-    // [Authorize(Roles = nameof(RoleTypes.User))]
-    // public async Task<IActionResult> Delete(Guid id)
-    // {
-    //     var vehicle = await _vehicleService.GetVehicleById(id);
-    //     if (vehicle == null) return NotFound();
-
-    //     // Get the current user's id from the claims
-    //     var userId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-    //     // Ensure the user is the owner of the vehicle
-
-    //     if (userId == null || userId != vehicle.OwnerId)
-    //     {
-    //         return Forbid();
-    //     }
-
-    //     await _vehicleService.DeleteVehicleById(id);
-
-    //     // Delete associated vehicle images from S3
-
-    //     var vehicleImages = await _vehicleImageService.GetVehicleImagesByVehicleId(id);
-
-    //     foreach (var image in vehicleImages)
-    //     {
-    //         try
-    //         {
-    //             _logger.LogInformation($"Deleting S3 object: Bucket={image.S3BucketName}, Key={image.S3ObjectKey}");
-
-    //             await _s3Client.DeleteObjectAsync(new Amazon.S3.Model.DeleteObjectRequest
-    //             {
-    //                 BucketName = image.S3BucketName,
-    //                 Key = image.S3ObjectKey
-    //             });
-
-    //             await _vehicleImageService.DeleteVehicleImageById(image.Id);
-    //             _logger.LogInformation($"Successfully deleted image {image.Id}");
-
-    //         }
-    //         catch (Exception ex)
-    //         {
-    //             _logger.LogError(ex, $"Failed to delete image {image.Id}");
-    //             // return StatusCode(500, $"Failed to delete image: {ex.Message}");
-    //         }
-
-    //         // await _vehicleImageService.DeleteVehicleImageById(image.Id);
-    //     }
-
-    //     return NoContent();
-    // }
     [HttpDelete("{id}")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> Delete(Guid id)
