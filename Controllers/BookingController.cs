@@ -1,5 +1,6 @@
 
 
+using backend.DTOs.BookingDto;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -39,12 +40,23 @@ public class BookingController(BookingService bookingService) : ControllerBase
     }
 
     [HttpPost]
-    [Authorize(Roles = nameof(RoleTypes.User))]
-    public async Task<ActionResult<Booking>> Create(Booking booking)
+    // [Authorize(Roles = nameof(RoleTypes.User))]
+    public async Task<ActionResult<Booking>> Create([FromBody] BookingDto booking)
     {
-        var createdBooking = await _bookingService.CreateBooking(booking);
+        var bookingData = new Booking
+        {
+            StartTime = booking.StartTime,
+            EndTime = booking.EndTime,
+            BookerName = booking.BookerName,
+            BookerEmail = booking.BookerEmail,
+            BookerPhone = booking.BookerPhone,
+            UserId = booking.UserId,
+            VehicleId = booking.VehicleId
+        };
 
-        return CreatedAtAction(nameof(GetById), new { id = booking.Id }, booking);
+        var createdBooking = await _bookingService.CreateBooking(bookingData);
+
+        return CreatedAtAction(nameof(GetById), new { id = createdBooking.Id }, createdBooking);
     }
 
     [HttpPut("{id}")]

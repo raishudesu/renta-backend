@@ -22,4 +22,17 @@ namespace backend.DTOs.VehicleDto
     {
         public required string? ImagePreSignedUrl { get; init; }
     }
+
+    public class OwnerNameDto
+    {
+        public required string FirstName { get; init; }
+        public required string LastName { get; init; }
+    }
+
+    public class VehicleWithOwnerNameDto : Vehicle
+    {
+
+        public required OwnerNameDto OwnerName { get; init; }
+        public required string? ImagePreSignedUrl { get; set; }
+    }
 }

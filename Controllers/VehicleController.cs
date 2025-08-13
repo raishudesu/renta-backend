@@ -20,12 +20,12 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
     private readonly ILogger _logger = logger;
 
     [HttpGet]
-    [Authorize(Roles = nameof(RoleTypes.Admin))]
-    public async Task<ActionResult<List<VehicleWithImageUrlDto>>> GetAll()
+    // [Authorize(Roles = nameof(RoleTypes.Admin))]
+    public async Task<ActionResult<List<VehicleWithOwnerNameDto>>> GetAll()
     {
         var vehicles = await _vehicleService.GetVehicles();
 
-        var vehiclesWithImages = new List<VehicleWithImageUrlDto>();
+        var vehiclesWithOwner = new List<VehicleWithOwnerNameDto>();
 
         foreach (var vehicle in vehicles)
         {
@@ -41,7 +41,14 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
                 })
             ).ToList();
 
-            vehiclesWithImages.Add(new VehicleWithImageUrlDto
+            var ownerName = new OwnerNameDto
+            {
+                FirstName = vehicle.Owner.FirstName,
+                LastName = vehicle.Owner.LastName,
+
+            };
+
+            vehiclesWithOwner.Add(new VehicleWithOwnerNameDto
             {
                 Id = vehicle.Id,
                 ModelName = vehicle.ModelName,
@@ -50,11 +57,12 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
                 PlateNumber = vehicle.PlateNumber,
                 Description = vehicle.Description,
                 OwnerId = vehicle.OwnerId,
+                OwnerName = ownerName,
                 ImagePreSignedUrl = imageUrls.Count > 0 ? imageUrls[0] : null // safely get the first image URL or null if none exist
             });
         }
 
-        return Ok(vehiclesWithImages);
+        return Ok(vehiclesWithOwner);
     }
 
     [HttpGet("{id}")]

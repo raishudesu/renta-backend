@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.DTOs.VehicleDto;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ public class VehicleService(AppDbContext context)
 
     public async Task<List<Vehicle>> GetVehicles()
     {
-        var vehicles = await db.Vehicle.ToListAsync();
+        var vehicles = await db.Vehicle.Include(v => v.Owner).ToListAsync();
 
         return vehicles;
     }

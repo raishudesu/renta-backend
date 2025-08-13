@@ -15,7 +15,7 @@ namespace backend.Models
     public class Booking
     {
         [Key]
-        public required Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
         [Required]
         public required DateTime StartTime { get; set; }
         [Required]
@@ -30,7 +30,7 @@ namespace backend.Models
 
         public string BookerPhone { get; set; } = string.Empty;
 
-        public string BookerPhoneCountry { get; set; } = string.Empty;
+        // public string BookerPhoneCountry { get; set; } = string.Empty;
 
         [Required]
         public required string UserId { get; set; } = null!;
