@@ -1,6 +1,7 @@
 
 
 using backend.DTOs.BookingDto;
+using backend.DTOs.VehicleDto;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -32,11 +33,40 @@ public class BookingController(BookingService bookingService) : ControllerBase
 
     [HttpGet("user/{userId}")]
     [Authorize(Roles = nameof(RoleTypes.User))]
-    public async Task<ActionResult<List<Booking>>> GetByUserId(string userId)
+    public async Task<ActionResult<List<BookingWithVehicleDto>>> GetByUserId(string userId)
     {
         var bookings = await _bookingService.GetBookingsByUserId(userId);
 
-        return Ok(bookings);
+        var bookingsWithVehicle = new List<BookingWithVehicleDto>();
+
+        foreach (var booking in bookings)
+        {
+            var vehicleDetails = new VehicleDetailDto
+            {
+                ModelName = booking.Vehicle.ModelName,
+                Color = booking.Vehicle.Color,
+                Description = booking.Vehicle.Description
+            };
+
+
+            var bookingDetails = new BookingWithVehicleDto
+            {
+                Id = booking.Id,
+                StartTime = booking.StartTime,
+                EndTime = booking.EndTime,
+                BookerName = booking.BookerName,
+                BookerEmail = booking.BookerEmail,
+                BookerPhone = booking.BookerPhone,
+                Status = booking.Status,
+                UserId = booking.UserId,
+                VehicleId = booking.VehicleId,
+                VehicleDetails = vehicleDetails
+            };
+
+            bookingsWithVehicle.Add(bookingDetails);
+        }
+
+        return Ok(bookingsWithVehicle);
     }
 
     [HttpPost]
@@ -71,8 +101,18 @@ public class BookingController(BookingService bookingService) : ControllerBase
         return NoContent();
     }
 
+    [HttpPatch("{id}")]
+    [Authorize(Roles = nameof(RoleTypes.User))]
+    public async Task<IActionResult> UpdateBookingStatus(Guid id, [FromBody] BookingStatus newStatus)
+    {
+
+        await _bookingService.UpdateBookingStatusById(id, newStatus);
+
+        return NoContent();
+    }
+
     [HttpDelete("{id}")]
-    // [Authorize(Roles = nameof(RoleTypes.User))]
+    [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> Delete(Guid id)
     {
         await _bookingService.DeleteBookingById(id);

@@ -1,5 +1,5 @@
+using backend.DTOs.VehicleDto;
 using backend.Models;
-
 
 namespace backend.DTOs.BookingDto
 {
@@ -17,8 +17,11 @@ namespace backend.DTOs.BookingDto
         public required string UserId { get; init; }
         public required Guid VehicleId { get; init; }
 
-
     }
 
+    public class BookingWithVehicleDto : Booking
+    {
+        public required VehicleDetailDto VehicleDetails { get; init; }
+    }
 
 }

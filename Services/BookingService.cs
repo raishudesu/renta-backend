@@ -44,7 +44,7 @@ public class BookingService(AppDbContext context)
     public async Task<List<Booking>> GetBookingsByUserId(string id)
     {
 
-        var bookings = await db.Booking.Where(b => b.UserId == id).ToListAsync();
+        var bookings = await db.Booking.Where(b => b.UserId == id).Include(b => b.Vehicle).ToListAsync();
 
         return bookings;
 
