@@ -10,6 +10,12 @@ namespace backend.DTOs.User
         public required string Password { get; init; }
     }
 
+    public class UpdateBusinessCoordinatesDto
+    {
+        // public required string Id { get; init; }
+        public required string BusinessCoordinates { get; init; }
+    }
+
     public class UserStatsDto
     {
         public int TotalVehicles { get; set; }

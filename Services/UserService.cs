@@ -2,6 +2,7 @@ using backend.Data;
 using Microsoft.EntityFrameworkCore;
 using backend.Models;
 using Microsoft.AspNetCore.Identity;
+using backend.DTOs.User;
 
 namespace backend.Services;
 
@@ -77,6 +78,15 @@ public class UserService
         {
             throw new Exception("Error retrieving user", ex);
         }
+    }
+
+    public async Task UpdateUserBusinessCoordinates(string id, UpdateBusinessCoordinatesDto data)
+    {
+        var user = await db.Users.FindAsync(id) ?? throw new KeyNotFoundException("User not found");
+
+        user.BusinessCoordinatesString = data.BusinessCoordinates;
+
+        await db.SaveChangesAsync();
     }
 
     // public async Task<User?> GetUserWithTasks(string id)

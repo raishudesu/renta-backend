@@ -57,6 +57,18 @@ public class UserController : ControllerBase
         return Ok(userStats);
     }
 
+    [HttpPatch("{id}/update-business-coordinates")]
+    [Authorize(Roles = nameof(RoleTypes.User))]
+    public async Task<ActionResult> UpdateBusinessCoordinates(string id, [FromBody] UpdateBusinessCoordinatesDto data)
+    {
+
+        if (id == null) return BadRequest();
+
+        await _userService.UpdateUserBusinessCoordinates(id, data);
+
+        return NoContent();
+    }
+
     // [HttpPut("{id}")]
     // public async Task<IActionResult> Update(string id, User user)
     // {
