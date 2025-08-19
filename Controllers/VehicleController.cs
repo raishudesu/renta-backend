@@ -21,11 +21,11 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
 
     [HttpGet]
     // [Authorize(Roles = nameof(RoleTypes.Admin))]
-    public async Task<ActionResult<List<VehicleWithOwnerNameDto>>> GetAll()
+    public async Task<ActionResult<List<VehicleWithOwnerDto>>> GetAll()
     {
         var vehicles = await _vehicleService.GetVehicles();
 
-        var vehiclesWithOwner = new List<VehicleWithOwnerNameDto>();
+        var vehiclesWithOwner = new List<VehicleWithOwnerDto>();
 
         foreach (var vehicle in vehicles)
         {
@@ -48,7 +48,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
 
             };
 
-            vehiclesWithOwner.Add(new VehicleWithOwnerNameDto
+            vehiclesWithOwner.Add(new VehicleWithOwnerDto
             {
                 Id = vehicle.Id,
                 ModelName = vehicle.ModelName,
@@ -58,6 +58,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
                 Description = vehicle.Description,
                 OwnerId = vehicle.OwnerId,
                 OwnerName = ownerName,
+                BusinessCoordinates = vehicle.Owner.BusinessCoordinatesString ?? null, // assuming this is the correct property for business coordinates
                 ImagePreSignedUrl = imageUrls.Count > 0 ? imageUrls[0] : null // safely get the first image URL or null if none exist
             });
         }
