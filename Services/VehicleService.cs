@@ -30,14 +30,14 @@ public class VehicleService(AppDbContext context)
             .Include(v => v.Owner)
             .AsQueryable();
 
-        if (vehicleParameters.Type != null)
+        if (vehicleParameters.Type.HasValue)
         {
             vehiclesQuery = vehiclesQuery.Where(v => v.Type == vehicleParameters.Type);
         }
 
         if (!string.IsNullOrWhiteSpace(vehicleParameters.ModelName))
         {
-            vehiclesQuery = vehiclesQuery.Where(v => v.ModelName.Contains(vehicleParameters.ModelName));
+            vehiclesQuery = vehiclesQuery.Where(v => EF.Functions.ILike(v.ModelName, $"%{vehicleParameters.ModelName}%"));
         }
 
         var vehicles = await vehiclesQuery
