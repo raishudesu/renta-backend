@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Amazon.S3;
 using System.Security.Claims;
+using Newtonsoft.Json;
+using backend.Common.Pagination;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -21,9 +23,9 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
 
     [HttpGet]
     // [Authorize(Roles = nameof(RoleTypes.Admin))]
-    public async Task<ActionResult<List<VehicleWithOwnerDto>>> GetAll()
+    public async Task<ActionResult<List<VehicleWithOwnerDto>>> GetAll([FromQuery] VehicleParameters vehicleParameters)
     {
-        var vehicles = await _vehicleService.GetVehicles();
+        var vehicles = await _vehicleService.GetVehicles(vehicleParameters);
 
         var vehiclesWithOwner = new List<VehicleWithOwnerDto>();
 
@@ -62,6 +64,18 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
                 ImagePreSignedUrl = imageUrls.Count > 0 ? imageUrls[0] : null // safely get the first image URL or null if none exist
             });
         }
+
+        var metadata = new
+        {
+            vehicles.TotalCount,
+            vehicles.PageSize,
+            vehicles.CurrentPage,
+            vehicles.TotalPages,
+            vehicles.HasNext,
+            vehicles.HasPrevious
+        };
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
+
 
         return Ok(vehiclesWithOwner);
     }

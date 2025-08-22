@@ -1,3 +1,4 @@
+using backend.Common.Pagination;
 using backend.Data;
 using backend.DTOs.VehicleDto;
 using backend.Models;
@@ -21,11 +22,32 @@ public class VehicleService(AppDbContext context)
         return vehicle;
     }
 
-    public async Task<List<Vehicle>> GetVehicles()
+    public async Task<PagedList<Vehicle>> GetVehicles(VehicleParameters vehicleParameters)
     {
-        var vehicles = await db.Vehicle.Include(v => v.Owner).ToListAsync();
+        ArgumentNullException.ThrowIfNull(vehicleParameters);
 
-        return vehicles;
+        var vehiclesQuery = db.Vehicle
+            .Include(v => v.Owner)
+            .AsQueryable();
+
+        if (vehicleParameters.Type != null)
+        {
+            vehiclesQuery = vehiclesQuery.Where(v => v.Type == vehicleParameters.Type);
+        }
+
+        if (!string.IsNullOrWhiteSpace(vehicleParameters.ModelName))
+        {
+            vehiclesQuery = vehiclesQuery.Where(v => v.ModelName.Contains(vehicleParameters.ModelName));
+        }
+
+        var vehicles = await vehiclesQuery
+            .Skip((vehicleParameters.PageNumber - 1) * vehicleParameters.PageSize)
+            .Take(vehicleParameters.PageSize)
+            .ToListAsync();
+
+        var count = await vehiclesQuery.CountAsync();
+
+        return new PagedList<Vehicle>(vehicles, count, vehicleParameters.PageNumber, vehicleParameters.PageSize);
     }
 
     // PAGINATE

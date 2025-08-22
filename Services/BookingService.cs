@@ -1,3 +1,4 @@
+using backend.Common.Pagination;
 using backend.Data;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -21,13 +22,22 @@ public class BookingService(AppDbContext context)
 
     }
 
-    // PAGINATE
-    public async Task<List<Booking>> GetBookings()
+    public async Task<PagedList<Booking>> GetBookings(PaginationParameters bookingParameters)
     {
 
-        var bookings = await db.Booking.ToListAsync();
+        ArgumentNullException.ThrowIfNull(bookingParameters);
 
-        return bookings;
+        var bookingsQuery = db.Booking
+            .Include(b => b.Vehicle);
+
+        var bookings = await bookingsQuery
+            .Skip((bookingParameters.PageNumber - 1) * bookingParameters.PageSize)
+            .Take(bookingParameters.PageSize)
+            .ToListAsync();
+
+        var count = await bookingsQuery.CountAsync();
+
+        return new PagedList<Booking>(bookings, count, bookingParameters.PageNumber, bookingParameters.PageSize);
 
     }
 
@@ -40,13 +50,25 @@ public class BookingService(AppDbContext context)
 
     }
 
-    // PAGINATE
-    public async Task<List<Booking>> GetBookingsByUserId(string id)
+    public async Task<PagedList<Booking>> GetBookingsByUserId(string id, PaginationParameters bookingParameters)
     {
 
-        var bookings = await db.Booking.Where(b => b.UserId == id).Include(b => b.Vehicle).ToListAsync();
+        ArgumentNullException.ThrowIfNull(bookingParameters);
 
-        return bookings;
+        var bookingsQuery = db.Booking
+            .Where(b => b.UserId == id)
+            .Include(b => b.Vehicle);
+
+
+
+        var bookings = await bookingsQuery
+            .Skip((bookingParameters.PageNumber - 1) * bookingParameters.PageSize)
+            .Take(bookingParameters.PageSize)
+            .ToListAsync();
+
+        var count = await bookingsQuery.CountAsync();
+
+        return new PagedList<Booking>(bookings, count, bookingParameters.PageNumber, bookingParameters.PageSize);
 
     }
 

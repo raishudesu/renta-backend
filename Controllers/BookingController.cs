@@ -1,12 +1,13 @@
 
 
+using backend.Common.Pagination;
 using backend.DTOs.BookingDto;
 using backend.DTOs.VehicleDto;
 using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -16,9 +17,20 @@ public class BookingController(BookingService bookingService) : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = nameof(RoleTypes.Admin))]
-    public async Task<ActionResult<List<Booking>>> GetAll()
+    public async Task<ActionResult<List<Booking>>> GetAll([FromQuery] PaginationParameters bookingParameters)
     {
-        var bookings = await _bookingService.GetBookings();
+        var bookings = await _bookingService.GetBookings(bookingParameters);
+
+        var metadata = new
+        {
+            bookings.TotalCount,
+            bookings.PageSize,
+            bookings.CurrentPage,
+            bookings.TotalPages,
+            bookings.HasNext,
+            bookings.HasPrevious
+        };
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
 
         return Ok(bookings);
     }
@@ -33,9 +45,9 @@ public class BookingController(BookingService bookingService) : ControllerBase
 
     [HttpGet("user/{userId}")]
     [Authorize(Roles = nameof(RoleTypes.User))]
-    public async Task<ActionResult<List<BookingWithVehicleDto>>> GetByUserId(string userId)
+    public async Task<ActionResult<List<BookingWithVehicleDto>>> GetByUserId(string userId, [FromQuery] PaginationParameters bookingParameters)
     {
-        var bookings = await _bookingService.GetBookingsByUserId(userId);
+        var bookings = await _bookingService.GetBookingsByUserId(userId, bookingParameters);
 
         var bookingsWithVehicle = new List<BookingWithVehicleDto>();
 
@@ -65,6 +77,17 @@ public class BookingController(BookingService bookingService) : ControllerBase
 
             bookingsWithVehicle.Add(bookingDetails);
         }
+
+        var metadata = new
+        {
+            bookings.TotalCount,
+            bookings.PageSize,
+            bookings.CurrentPage,
+            bookings.TotalPages,
+            bookings.HasNext,
+            bookings.HasPrevious
+        };
+        Response.Headers.Append("X-Pagination", JsonConvert.SerializeObject(metadata));
 
         return Ok(bookingsWithVehicle);
     }

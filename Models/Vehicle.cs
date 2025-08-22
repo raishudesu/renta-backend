@@ -42,4 +42,28 @@ namespace backend.Models
         [JsonIgnore]
         public virtual ICollection<VehicleImage> VehicleImages { get; set; } = new List<VehicleImage>();
     }
+
+
+    public class VehicleParameters
+    {
+        const int maxPageSize = 50;
+        public int PageNumber { get; set; } = 1;
+
+        public VehicleType? Type { get; set; }
+
+        public string? ModelName { get; set; }
+
+        private int _pageSize = 10;
+        public int PageSize
+        {
+            get
+            {
+                return _pageSize;
+            }
+            set
+            {
+                _pageSize = (value > maxPageSize) ? maxPageSize : value;
+            }
+        }
+    }
 }
