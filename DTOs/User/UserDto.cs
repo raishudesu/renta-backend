@@ -22,4 +22,10 @@ namespace backend.DTOs.User
         public int TotalCompletedBookings { get; set; }
         public int TotalActiveBookings { get; set; }
     }
+
+    public class UpdatePasswordDto
+    {
+        public required string CurrentPassword { get; init; }
+        public required string NewPassword { get; init; }
+    }
 }

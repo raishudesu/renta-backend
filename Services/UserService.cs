@@ -103,4 +103,17 @@ public class UserService
         };
     }
 
+
+    public async Task UpdateUserPassword(string userId, string newPassword)
+    {
+        var user = await db.Users.FindAsync(userId) ?? throw new KeyNotFoundException("User not found");
+
+        var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+        if (!result.Succeeded)
+        {
+            throw new Exception("Failed to update password: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
+    }
 }

@@ -3,6 +3,8 @@ using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using backend.DTOs.User;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -16,11 +18,18 @@ public class UserController : ControllerBase
     private readonly VehicleService _vehicleService;
     private readonly BookingService _bookingService;
 
-    public UserController(UserService userService, VehicleService vehicleService, BookingService bookingService)
+    private readonly UserManager<User> _userManager;
+
+    private readonly SignInManager<User> _signInManager;
+
+    public UserController(UserService userService, VehicleService vehicleService, BookingService bookingService, UserManager<User> userManager, SignInManager<User> signInManager)
     {
         _userService = userService;
         _vehicleService = vehicleService;
         _bookingService = bookingService;
+        _userManager = userManager;
+        _signInManager = signInManager;
+
     }
 
     [HttpGet]
@@ -61,20 +70,40 @@ public class UserController : ControllerBase
         return NoContent();
     }
 
-    // [HttpPut("{id}")]
-    // public async Task<IActionResult> Update(string id, User user)
-    // {
-    //     if (id != user.Id) return BadRequest();
+    [HttpPatch("{id}/update-password")]
+    [Authorize(Roles = nameof(RoleTypes.User))]
+    public async Task<ActionResult> UpdatePassword(string id, [FromBody] UpdatePasswordDto data)
+    {
+        // if (id == null) return BadRequest();
 
-    //     var existingUser = await _userService.GetUserById(id);
-    //     if (existingUser == null) return NotFound();
+        if (data.CurrentPassword == data.NewPassword)
+        {
+            return BadRequest("New password must be different from the current password.");
+        }
 
-    //     existingUser.UserName = user.UserName;
-    //     existingUser.Email = user.Email;
+        var userIdFromClaims = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
 
-    //     await _userService.UpdateUser(existingUser);
+        if (userIdFromClaims == null || userIdFromClaims != id)
+        {
+            return Forbid();
+        }
 
-    //     return NoContent();
-    // }
+        var user = await _userManager.FindByIdAsync(id);
 
+        if (user == null)
+        {
+            return NotFound();
+        }
+
+        var passwordComparisonResult = await _signInManager.CheckPasswordSignInAsync(user, data.CurrentPassword, lockoutOnFailure: false);
+
+        if (!passwordComparisonResult.Succeeded)
+        {
+            return BadRequest(new { message = "Current password is incorrect." });
+        }
+
+        await _userService.UpdateUserPassword(id, data.NewPassword);
+
+        return NoContent();
+    }
 }
