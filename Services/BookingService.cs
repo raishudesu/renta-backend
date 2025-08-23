@@ -64,6 +64,7 @@ public class BookingService(AppDbContext context)
         var bookings = await bookingsQuery
             .Skip((bookingParameters.PageNumber - 1) * bookingParameters.PageSize)
             .Take(bookingParameters.PageSize)
+            .OrderBy(b => b.CreatedAt)
             .ToListAsync();
 
         var count = await bookingsQuery.CountAsync();

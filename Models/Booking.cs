@@ -9,7 +9,8 @@ namespace backend.Models
     {
         Pending,
         Confirmed,
-        Cancelled
+        Cancelled,
+        Completed
     }
 
     public class Booking
@@ -38,6 +39,9 @@ namespace backend.Models
         public required Guid VehicleId { get; set; }
 
         public BookingStatus Status { get; set; } = BookingStatus.Pending;
+
+        [JsonIgnore]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey(nameof(UserId))]
         [JsonIgnore]

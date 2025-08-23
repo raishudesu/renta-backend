@@ -89,11 +89,18 @@ public class UserService
         await db.SaveChangesAsync();
     }
 
-    // public async Task<User?> GetUserWithTasks(string id)
-    // {
-    //     var user = await db.Users.Include(u => u.UserTasks).FirstOrDefaultAsync(u => u.Id == id);
+    public async Task<UserStatsDto> GetUserStats(string userId)
+    {
+        var totalVehicles = await db.Vehicle.CountAsync(v => v.OwnerId == userId);
+        var TotalCompletedBookings = await db.Booking.Where(b => b.Status == BookingStatus.Completed).CountAsync(b => b.UserId == userId);
+        var totalActiveBookings = await db.Booking.Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Completed).CountAsync(b => b.UserId == userId);
 
-    //     return user;
-    // }
+        return new UserStatsDto
+        {
+            TotalVehicles = totalVehicles,
+            TotalCompletedBookings = TotalCompletedBookings,
+            TotalActiveBookings = totalActiveBookings
+        };
+    }
 
 }

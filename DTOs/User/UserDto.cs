@@ -19,6 +19,7 @@ namespace backend.DTOs.User
     public class UserStatsDto
     {
         public int TotalVehicles { get; set; }
-        public int TotalBookings { get; set; }
+        public int TotalCompletedBookings { get; set; }
+        public int TotalActiveBookings { get; set; }
     }
 }

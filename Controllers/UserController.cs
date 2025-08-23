@@ -44,17 +44,9 @@ public class UserController : ControllerBase
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<UserStatsDto>> GetUserStats(string id)
     {
+        var stats = await _userService.GetUserStats(id);
 
-        var totalVehicles = await _vehicleService.GetTotalVehiclesByUserId(id);
-        var totalBookings = await _bookingService.GetTotalBookingsByUserId(id);
-
-        var userStats = new UserStatsDto
-        {
-            TotalVehicles = totalVehicles,
-            TotalBookings = totalBookings
-        };
-
-        return Ok(userStats);
+        return Ok(stats);
     }
 
     [HttpPatch("{id}/update-business-coordinates")]
