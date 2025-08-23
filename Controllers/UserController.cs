@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using backend.DTOs.User;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
+using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -33,6 +34,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.Admin))]
     public async Task<ActionResult<List<User>>> GetAll()
     {
@@ -42,6 +44,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<User>> GetById(string id)
     {
@@ -50,6 +53,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id}/stats")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<UserStatsDto>> GetUserStats(string id)
     {
@@ -59,6 +63,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPatch("{id}/update-business-coordinates")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult> UpdateBusinessCoordinates(string id, [FromBody] UpdateBusinessCoordinatesDto data)
     {
@@ -71,6 +76,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPatch("{id}/update-password")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult> UpdatePassword(string id, [FromBody] UpdatePasswordDto data)
     {

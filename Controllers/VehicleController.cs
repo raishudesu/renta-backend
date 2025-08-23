@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Amazon.S3;
 using System.Security.Claims;
 using Newtonsoft.Json;
-using backend.Common.Pagination;
+using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -22,6 +22,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
     private readonly ILogger _logger = logger;
 
     [HttpGet]
+    [EnableRateLimiting("UserAwarePolicy")]
     // [Authorize(Roles = nameof(RoleTypes.Admin))]
     public async Task<ActionResult<List<VehicleWithOwnerDto>>> GetAll([FromQuery] VehicleParameters vehicleParameters)
     {
@@ -81,6 +82,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
     }
 
     [HttpGet("{id}")]
+    [EnableRateLimiting("ConcurrencyPolicy")]
     public async Task<ActionResult<VehicleWithImageUrlDto>> GetById(Guid id)
     {
         var vehicle = await _vehicleService.GetVehicleById(id);
@@ -114,6 +116,8 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
     }
 
     [HttpGet("user/{userId}")]
+    [EnableRateLimiting("ConcurrencyPolicy")]
+
     public async Task<ActionResult<List<VehicleWithImageUrlDto>>> GetByUserId(string userId)
     {
         var vehicles = await _vehicleService.GetVehiclesByUserId(userId);
@@ -152,6 +156,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
     }
 
     [HttpPost]
+    [EnableRateLimiting("ConcurrencyPolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<Vehicle>> Create([FromForm] VehicleDto vehicle)
     {
@@ -202,6 +207,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
     }
 
     [HttpPatch("{id}")]
+    [EnableRateLimiting("ConcurrencyPolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> Update(Guid id, [FromForm] VehicleDto vehicle)
     {
@@ -284,6 +290,7 @@ public class VehicleController(VehicleService vehicleService, VehicleImageServic
     }
 
     [HttpDelete("{id}")]
+    [EnableRateLimiting("ConcurrencyPolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> Delete(Guid id)
     {

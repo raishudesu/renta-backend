@@ -7,6 +7,7 @@ using backend.Models;
 using backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Newtonsoft.Json;
 
 [ApiController]
@@ -16,6 +17,7 @@ public class BookingController(BookingService bookingService) : ControllerBase
     private readonly BookingService _bookingService = bookingService;
 
     [HttpGet]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.Admin))]
     public async Task<ActionResult<List<Booking>>> GetAll([FromQuery] PaginationParameters bookingParameters)
     {
@@ -36,6 +38,7 @@ public class BookingController(BookingService bookingService) : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [EnableRateLimiting("ApiPolicy")]
     public async Task<ActionResult<Booking>> GetById(Guid id)
     {
         var booking = await _bookingService.GetBookingById(id);
@@ -44,6 +47,7 @@ public class BookingController(BookingService bookingService) : ControllerBase
     }
 
     [HttpGet("user/{userId}")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<List<BookingWithVehicleDto>>> GetByUserId(string userId, [FromQuery] PaginationParameters bookingParameters)
     {
@@ -93,6 +97,8 @@ public class BookingController(BookingService bookingService) : ControllerBase
     }
 
     [HttpPost]
+    [EnableRateLimiting("ApiPolicy")]
+
     // [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<ActionResult<Booking>> Create([FromBody] BookingDto booking)
     {
@@ -112,19 +118,22 @@ public class BookingController(BookingService bookingService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = createdBooking.Id }, createdBooking);
     }
 
-    [HttpPut("{id}")]
-    // [Authorize(Roles = nameof(RoleTypes.User))]
+    // [HttpPut("{id}")]
+    // [EnableRateLimiting("ApiPolicy")]
 
-    public async Task<IActionResult> Update(Guid id, Booking booking)
-    {
-        if (id != booking.Id) return BadRequest();
+    // // [Authorize(Roles = nameof(RoleTypes.User))]
 
-        await _bookingService.UpdateBooking(booking);
+    // public async Task<IActionResult> Update(Guid id, Booking booking)
+    // {
+    //     if (id != booking.Id) return BadRequest();
 
-        return NoContent();
-    }
+    //     await _bookingService.UpdateBooking(booking);
+
+    //     return NoContent();
+    // }
 
     [HttpPatch("{id}")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> UpdateBookingStatus(Guid id, [FromBody] BookingStatus newStatus)
     {
@@ -135,6 +144,7 @@ public class BookingController(BookingService bookingService) : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.User))]
     public async Task<IActionResult> Delete(Guid id)
     {

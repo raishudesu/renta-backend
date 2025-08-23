@@ -44,7 +44,7 @@ public class BookingService(AppDbContext context)
     public async Task<Booking?> GetBookingById(Guid id)
     {
 
-        var booking = await db.Booking.Include(b => b.Vehicle).FirstOrDefaultAsync(b => b.Id == id);
+        var booking = await db.Booking.Include(b => b.Vehicle).Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Completed).FirstOrDefaultAsync(b => b.Id == id);
 
         return booking;
 

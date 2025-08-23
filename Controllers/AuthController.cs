@@ -12,6 +12,7 @@ using System.Text;
 using backend.Models;
 using Microsoft.AspNetCore.Identity.Data;
 using backend.DTOs.User;
+using Microsoft.AspNetCore.RateLimiting;
 
 
 public class JwtSettings
@@ -46,6 +47,7 @@ namespace dotnet_authentication.Controllers
         }
 
         [HttpPost("register")]
+        [EnableRateLimiting("ApiPolicy")]
         public async Task<IActionResult> Register(UserRegistrationDto request)
         {
             var user = new User { UserName = request.Email, FirstName = request.FirstName, LastName = request.LastName, Email = request.Email };
@@ -65,6 +67,7 @@ namespace dotnet_authentication.Controllers
         }
 
         [HttpPost("login")]
+        [EnableRateLimiting("AuthPolicy")]
         public async Task<IActionResult> Login(LoginRequest request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);

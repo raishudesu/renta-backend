@@ -2,6 +2,7 @@ using backend.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 [ApiController]
 [Route("api/[controller]/roles")]
@@ -21,6 +22,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("add")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.Admin))]
     public async Task<IActionResult> AddRole([FromBody] string role)
     {
@@ -39,6 +41,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("add-to-user")]
+    [EnableRateLimiting("UserAwarePolicy")]
     [Authorize(Roles = nameof(RoleTypes.Admin))]
 
     public async Task<IActionResult> AddToUser([FromBody] string role, string userId)
