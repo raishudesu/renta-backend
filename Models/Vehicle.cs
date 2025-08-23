@@ -49,6 +49,7 @@ namespace backend.Models
         const int maxPageSize = 50;
         public int PageNumber { get; set; } = 1;
 
+
         public VehicleType? Type { get; set; }
 
         public string? ModelName { get; set; }
@@ -65,5 +66,16 @@ namespace backend.Models
                 _pageSize = (value > maxPageSize) ? maxPageSize : value;
             }
         }
+
+        // For nearest search
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
+        public double? MaxDistanceKm { get; set; } // optional filter
+    }
+
+    public class Coordinates
+    {
+        public double Lat { get; set; }
+        public double Lng { get; set; }
     }
 }

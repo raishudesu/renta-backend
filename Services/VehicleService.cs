@@ -3,6 +3,8 @@ using backend.Data;
 using backend.DTOs.VehicleDto;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using static backend.Helpers.Haversine;
 
 namespace backend.Services;
 
@@ -40,9 +42,50 @@ public class VehicleService(AppDbContext context)
             vehiclesQuery = vehiclesQuery.Where(v => EF.Functions.ILike(v.ModelName, $"%{vehicleParameters.ModelName}%"));
         }
 
+        // ✅ Distance filter if user provided location
+        if (vehicleParameters.Latitude.HasValue && vehicleParameters.Longitude.HasValue)
+        {
+            var userLat = vehicleParameters.Latitude.Value;
+            var userLng = vehicleParameters.Longitude.Value;
+
+            var filteredList = await vehiclesQuery
+                .Where(v => !string.IsNullOrEmpty(v.Owner.BusinessCoordinatesString))
+                .ToListAsync();
+
+            var filtered = filteredList
+                .Select(v =>
+                {
+                    var coords = JsonConvert.DeserializeObject<Coordinates>(v.Owner.BusinessCoordinatesString);
+                    if (coords == null)
+                        return null;
+                    var distance = UseHaversine(userLat, userLng, coords.Lat, coords.Lng);
+                    return new { Vehicle = v, Distance = distance };
+                })
+                .Where(x => x != null);
+
+            if (vehicleParameters.MaxDistanceKm.HasValue)
+                filtered = filtered.Where(x => x!.Distance <= vehicleParameters.MaxDistanceKm.Value);
+
+            // order by nearest and paginate in memory
+            var orderedVehicles = filtered
+                .OrderBy(x => x!.Distance)
+                .Select(x => x!.Vehicle)
+                .ToList();
+
+            var pagedVehicles = orderedVehicles
+                .Skip((vehicleParameters.PageNumber - 1) * vehicleParameters.PageSize)
+                .Take(vehicleParameters.PageSize)
+                .ToList();
+
+            var filteredCount = orderedVehicles.Count();
+
+            return new PagedList<Vehicle>(pagedVehicles, filteredCount, vehicleParameters.PageNumber, vehicleParameters.PageSize);
+        }
+
         var vehicles = await vehiclesQuery
             .Skip((vehicleParameters.PageNumber - 1) * vehicleParameters.PageSize)
             .Take(vehicleParameters.PageSize)
+            .OrderBy(v => v.CreatedAt)
             .ToListAsync();
 
         var count = await vehiclesQuery.CountAsync();
@@ -91,4 +134,6 @@ public class VehicleService(AppDbContext context)
     {
         return await db.Vehicle.CountAsync(v => v.OwnerId == userId);
     }
+
+
 }
