@@ -35,3 +35,7 @@ appsettings*
 
 # Development environment files
 .env
+
+/publish
+*.pem
+*.tar.gz
