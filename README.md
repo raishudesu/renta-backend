@@ -68,6 +68,320 @@ A seamless experience for both **vehicle owners** and **renters**.
 
 ---
 
-## Installation & Setup
+## 🚀 Deploying Renta's ASP.NET Core Web API on AWS EC2 with Nginx
 
-> ⚠️ _This section will be updated as the project development progresses._
+This guide explains how to deploy an ASP.NET Core Web API application to an **AWS EC2 Amazon Linux 2023 instance** and serve it through **Nginx**.
+
+---
+
+## 📌 Prerequisites
+
+- AWS EC2 instance (Amazon Linux 2023).
+- Domain name (optional).
+- .NET SDK (locally for publishing).
+- .NET Runtime installed on EC2.
+- Nginx installed.
+- Published ASP.NET Core Web API project.
+
+---
+
+## ⚙️ 1. Connect to EC2
+
+```sh
+ssh -i your-key.pem ec2-user@your-ec2-public-ip
+```
+
+---
+
+## 📦 2. Install Dependencies
+
+### Update system
+
+```sh
+sudo dnf update -y
+```
+
+### Install .NET runtime
+
+```sh
+wget https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/8.0.19/aspnetcore-runtime-8.0.19-linux-x64.tar.gz
+```
+
+_(Replace `8.0` with your target runtime if needed)_
+
+Append these lines into your **\~/.bash_profile**, you can run this:
+
+```bash
+echo 'export DOTNET_ROOT=$HOME/dotnet' >> ~/.bash_profile
+echo 'export PATH=$PATH:$HOME/dotnet' >> ~/.bash_profile
+echo 'export DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=True' >> ~/.bash_profile
+```
+
+Then reload your profile so the changes apply immediately:
+
+```bash
+source ~/.bash_profile
+```
+
+### Install Nginx
+
+```sh
+sudo dnf install -y nginx
+```
+
+Enable and start Nginx:
+
+```sh
+sudo systemctl enable nginx
+sudo systemctl start nginx
+```
+
+---
+
+## 📂 3. Deploy the ASP.NET Core App
+
+### On local machine, publish the app
+
+```sh
+dotnet publish --configuration Release --output ./publish
+```
+
+### Create a zip file of the published application
+
+```sh
+tar -czf renta.tar.gz -C publish .
+```
+
+### Copy to EC2 instance using SCP
+
+```sh
+scp -i /path/to/your-key.pem renta.tar.gz ec2-user@your-ec2-ip:/home/ec2-user/
+```
+
+### Create application directory
+
+```sh
+sudo mkdir -p /opt/renta
+sudo chown $USER:$USER /opt/renta
+```
+
+### Extract the application
+
+```sh
+cd /opt/renta
+tar -xzf /home/ec2-user/renta.tar.gz
+```
+
+### Make sure the main DLL is executable
+
+```sh
+chmod +x backend.dll
+```
+
+### Test the application
+
+```sh
+dotnet backend.dll
+```
+
+### Create the environment file
+
+```sh
+sudo nano /opt/renta/.env
+```
+
+### Add your environment variables (replace with your actual values):
+
+```
+AWS_ACCESS_KEY_ID=AKIA1234567890EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+CONNECTION_STRING=Host=your-rds-endpoint.amazonaws.com;Database=yourdb;Username=youruser;Password=yourpassword;Port=5432;
+JWT_SECRET_KEY=your-super-long-random-jwt-secret-key-at-least-32-characters-long
+JWT_ISSUER=your-app-name
+JWT_AUDIENCE=your-app-users
+```
+
+### Save and exit (Ctrl+X, then Y, then Enter)
+
+### Secure the environment file (IMPORTANT!)
+
+```sh
+sudo chmod 600 /opt/renta/.env
+sudo chown root:root /opt/renta/.env
+```
+
+## 🛠️ 4. Setup Systemd Service
+
+---
+
+Create service file:
+
+```sh
+sudo nano /etc/systemd/system/renta.service
+```
+
+Paste:
+
+```ini
+[Unit]
+Description=Renta .NET Web API
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+Group=ec2-user
+WorkingDirectory=/opt/renta
+ExecStart=/home/ec2-user/dotnet/dotnet /opt/renta/backend.dll
+Restart=always
+RestartSec=10
+KillSignal=SIGINT
+SyslogIdentifier=renta
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=ASPNETCORE_URLS=http://localhost:5000
+Environment=DOTNET_ROOT=/home/ec2-user/dotnet
+Environment=PATH=/home/ec2-user/dotnet:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+EnvironmentFile=/opt/renta/.env
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Make sure dotnet is executable
+
+```sh
+chmod +x /home/ec2-user/dotnet/dotnet
+```
+
+### Configure ownership of the application directory
+
+```sh
+sudo chown -R ec2-user:ec2-user /opt/renta
+```
+
+### Configure .env file permissions
+
+```sh
+sudo chown ec2-user:ec2-user /opt/renta/.env
+sudo chmod 600 /opt/renta/.env
+```
+
+### Verify the files exist and have correct permissions
+
+```sh
+ls -la /home/ec2-user/dotnet/dotnet
+ls -la /opt/renta/backend.dll
+ls -la /opt/renta/.env
+```
+
+Reload and start:
+
+```sh
+sudo systemctl daemon-reload
+sudo systemctl enable renta
+sudo systemctl start renta
+sudo systemctl status renta
+```
+
+---
+
+## 🌐 5. Configure Nginx Reverse Proxy
+
+Create config:
+
+```sh
+sudo nano /etc/nginx/conf.d/renta.conf
+```
+
+Paste:
+
+```nginx
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+
+    server_name _;
+
+    location / {
+        proxy_pass         http://127.0.0.1:5000;
+        proxy_http_version 1.1;
+
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection keep-alive;
+        proxy_set_header   Host $host;
+        proxy_cache_bypass $http_upgrade;
+
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+Test and restart:
+
+```sh
+sudo nginx -t
+sudo systemctl restart nginx
+```
+
+---
+
+## 🔐 6. AWS Security Group
+
+- Allow **port 80** (HTTP) and/or **443** (HTTPS).
+- Restrict other ports.
+- Port **5000** remains internal only.
+
+---
+
+## 🔄 7. Verify Setup
+
+Check API directly on EC2:
+
+```sh
+curl http://127.0.0.1:5000/api/Vehicle
+```
+
+Check via Nginx (public):
+
+```sh
+curl http://your-ec2-public-ip/api/Vehicle
+```
+
+---
+
+## 🔑 8. (Optional) HTTPS with Certbot
+
+If using a domain:
+
+```sh
+sudo dnf install -y certbot python3-certbot-nginx
+sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+```
+
+---
+
+## 🧰 9. Maintenance Commands
+
+Restart API:
+
+```sh
+sudo systemctl restart renta
+```
+
+View logs:
+
+```sh
+journalctl -u renta -f
+```
+
+Restart Nginx:
+
+```sh
+sudo systemctl restart nginx
+```
+
+---
+
+✅ Your ASP.NET Core API is now deployed and served through **Nginx reverse proxy** on AWS EC2.
