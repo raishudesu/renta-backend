@@ -39,12 +39,12 @@ A seamless experience for both **vehicle owners** and **renters**.
 ## Powerful Features
 
 - **QR Code Technology**  
-  Instant booking confirmation and seamless pickup process with secure QR codes.
+  Instant booking confirmation and seamless pickup process with QR codes.
 
 - **Owner Dashboard**  
-  Comprehensive analytics, booking management, and revenue tracking in one place.
+  Vehicle, and Booking management in one place.
 
-- **Smart Scheduling**  
+- **Smart Scheduling _(Soon)_** \
   Automated availability management and booking conflict prevention.
 
 - **Open Source**  
