@@ -72,8 +72,6 @@ A seamless experience for both **vehicle owners** and **renters**.
 
 This guide explains how to deploy an ASP.NET Core Web API application to an **AWS EC2 Amazon Linux 2023 instance** and serve it through **Nginx**.
 
----
-
 ## 📌 Prerequisites
 
 - AWS EC2 instance (Amazon Linux 2023).
@@ -140,9 +138,16 @@ sudo systemctl start nginx
 
 ## 📂 3. Deploy the ASP.NET Core App
 
-### On local machine, publish the app
+### Clone this Repository on your local machine
 
 ```sh
+git clone https://github.com/raishudesu/renta-backend.git
+```
+
+### Publish the app
+
+```sh
+cd renta-backend
 dotnet publish --configuration Release --output ./publish
 ```
 
